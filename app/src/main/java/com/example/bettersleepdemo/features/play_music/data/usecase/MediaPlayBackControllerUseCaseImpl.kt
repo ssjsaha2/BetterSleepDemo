@@ -1,17 +1,49 @@
 package com.example.bettersleepdemo.features.play_music.data.usecase
 
+import android.content.ComponentName
 import android.content.Context
-import android.media.MediaPlayer
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import com.example.bettersleepdemo.features.play_music.data.servie.MediaPlayBackService
 import com.example.bettersleepdemo.features.play_music.domain.repository.SoundRepository
 import com.example.bettersleepdemo.features.play_music.domain.usecase.MediaPlayBackControllerUseCase
+import javax.inject.Inject
 
-class MediaPlayBackControllerUseCaseImpl(
+class MediaPlayBackControllerUseCaseImpl @Inject constructor(
     private var repo: SoundRepository,
     private val context: Context,
 ) : MediaPlayBackControllerUseCase {
 
-    private val mediaService: MediaPlayBackService? = null
+    private var mediaService: MediaPlayBackService? = null
+
+    private var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            val musicBinder = binder as? MediaPlayBackService.MusicBinder
+            mediaService = musicBinder?.getService()
+            isBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+            mediaService = null
+        }
+    }
+
+    override fun bindService() {
+        val intent = Intent(context, MediaPlayBackService::class.java)
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun unbindService() {
+        if (isBound) {
+            context.unbindService(serviceConnection)
+            isBound = false
+        }
+    }
+
     override fun playMusic(id: Int) {
         mediaService?.playMedia(id)
     }

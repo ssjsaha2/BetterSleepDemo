@@ -8,4 +8,6 @@ interface MediaPlayBackControllerUseCase {
     fun clearAllMusic()
     suspend fun saveMusic(id: Int)
     suspend fun getAllMusic(): List<Int>
+    fun unbindService()
+    fun bindService()
 }

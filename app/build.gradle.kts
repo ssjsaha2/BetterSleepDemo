@@ -60,5 +60,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.hilt.android)
+    implementation(libs.hilt.nav.compose)
     kapt(libs.hilt.android.compiler)
 }
