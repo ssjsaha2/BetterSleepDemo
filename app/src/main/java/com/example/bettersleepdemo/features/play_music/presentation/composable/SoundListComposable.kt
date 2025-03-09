@@ -1,5 +1,12 @@
 package com.example.bettersleepdemo.features.play_music.presentation.composable
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,15 +30,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -42,7 +52,6 @@ import com.example.bettersleepdemo.common.getMediaIcon
 import com.example.bettersleepdemo.features.play_music.presentation.ui_event.MediaUIEvent
 import com.example.bettersleepdemo.features.play_music.presentation.ui_state.MediaPlaybackUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SoundListComposable(
     modifier: Modifier = Modifier,
@@ -50,6 +59,23 @@ fun SoundListComposable(
     onUIEvent: (MediaUIEvent) -> Unit
 ) {
     val mediaList = uiState.mediaButtonStateList
+    val rotation = remember { Animatable(0f) }
+
+    // Start rotating continuously when the Composable is first composed
+    LaunchedEffect(Unit) {
+        rotation.animateTo(
+            targetValue = 10f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 2_000
+                    0f at 0 with LinearEasing
+                    10f at 0 with LinearEasing
+                    -10f at 0 with LinearEasing
+                },
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,13 +128,21 @@ fun SoundListComposable(
                                 )
                             ),
                             contentDescription = "",
-                            modifier = Modifier.clickable {
-                                if (!media.second) {
-                                    onUIEvent(MediaUIEvent.PlayMusic(media.first.first))
-                                } else {
-                                    onUIEvent(MediaUIEvent.PauseMusic(media.first.first))
+                            modifier = Modifier
+                                .clickable {
+                                    if (!media.second) {
+                                        onUIEvent(MediaUIEvent.PlayMusic(media.first.first))
+                                    } else {
+                                        onUIEvent(MediaUIEvent.PauseMusic(media.first.first))
+                                    }
                                 }
-                            })
+                                .graphicsLayer {
+                                    rotationZ = if (media.second) {
+                                        rotation.value
+                                    } else {
+                                        0f
+                                    }
+                                })
                         Text(
                             text = media.first.second,
                             color = MaterialTheme.colorScheme.onBackground
