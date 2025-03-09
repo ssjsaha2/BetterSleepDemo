@@ -61,5 +61,8 @@ dependencies {
 
     implementation(libs.hilt.android)
     implementation(libs.hilt.nav.compose)
+    implementation(libs.datastore)
     kapt(libs.hilt.android.compiler)
+
+    implementation(libs.gson)
 }

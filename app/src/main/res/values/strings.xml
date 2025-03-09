@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">BetterSleepDemo</string>
+    <string name="birds">Birds</string>
+    <string name="Flute">Flute</string>
+    <string name="Lounge">Lounge</string>
+    <string name="music_box">Music Box</string>
+    <string name="ocean">Ocean</string>
+    <string name="orchestral">Orchestral</string>
+    <string name="rain">Rain</string>
+    <string name="wind">Wind</string>
+
 </resources>

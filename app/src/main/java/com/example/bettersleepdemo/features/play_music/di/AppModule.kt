@@ -2,11 +2,10 @@ package com.example.bettersleepdemo.features.play_music.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.bettersleepdemo.R
-import com.example.bettersleepdemo.features.play_music.data.repository.SoundRepositoryImpl
-import com.example.bettersleepdemo.features.play_music.data.usecase.MediaPlayBackControllerUseCaseImpl
-import com.example.bettersleepdemo.features.play_music.domain.repository.SoundRepository
-import com.example.bettersleepdemo.features.play_music.domain.usecase.MediaPlayBackControllerUseCase
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import com.example.bettersleepdemo.common.mediaToNameMap
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,29 +20,21 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-    }
-
-    @Provides
-    @Singleton
-    fun provideStaticMediaFileResIds(): List<Pair<Int, String>> {
-        return listOf(
-            Pair(R.raw.birds, "Birds"),
-            Pair(R.raw.flute, "Flute"),
-            Pair(R.raw.lounge, "Lounge"),
-            Pair(R.raw.musicbox, "Music Box"),
-            Pair(R.raw.ocean, "Ocean"),
-            Pair(R.raw.orchestral, "Orchestral"),
-            Pair(R.raw.piano, "Piano"),
-            Pair(R.raw.rain, "Rain"),
-            Pair(R.raw.wind, "Wind")
-        )
+    fun provideStaticMediaFileResIds(): HashMap<Int,String> {
+        return mediaToNameMap
     }
 
     @Provides
     @Singleton
     fun provideContext(@ApplicationContext context: Context) : Context{
         return context
+    }
+
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences>{
+        return context.dataStore
     }
 }

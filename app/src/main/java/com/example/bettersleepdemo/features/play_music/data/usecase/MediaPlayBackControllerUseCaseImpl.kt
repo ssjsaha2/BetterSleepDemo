@@ -50,24 +50,27 @@ class MediaPlayBackControllerUseCaseImpl @Inject constructor(
 
     override fun pauseMusic(id: Int) {
         mediaService?.pauseMedia(id)
-
     }
 
-    override fun playAllMusic() {
-        mediaService?.playAllMedia()
+    override fun playAllMusic(mediaList:List<Int>) {
+        mediaService?.playAllMedia(mediaList)
     }
 
-    override fun pauseAllMusic() {
-        mediaService?.pauseAllMedia()
+    override fun pauseAllMusic(mediaList:List<Int>) {
+        mediaService?.pauseAllMedia(mediaList)
     }
 
     override fun clearAllMusic() {
         mediaService?.clearAllMedia()
     }
 
-    override suspend fun saveMusic(id: Int) {
-        repo.saveSound(id)
+    override suspend fun saveMusic(listOfMedia: List<Int>) {
+        repo.saveSound(listOfMedia)
     }
 
     override suspend fun getAllMusic(): List<Int> = repo.getAllSavedSounds()
+
+    override suspend fun deleteAllSounds() {
+        repo.deleteAllSounds()
+    }
 }

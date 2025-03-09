@@ -1,6 +1,5 @@
 package com.example.bettersleepdemo.features.play_music.presentation.ui_event
 
-import android.provider.MediaStore.Audio.Media
 import androidx.annotation.IdRes
 
 sealed class MediaUIEvent {
@@ -9,4 +8,5 @@ sealed class MediaUIEvent {
     data object PlayAllMusic: MediaUIEvent()
     data object PauseAllMusic: MediaUIEvent()
     data object ClearAllMusic: MediaUIEvent()
+    data object DismissWarningDialog: MediaUIEvent()
 }
