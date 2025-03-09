@@ -28,6 +28,10 @@ class MediaPlayViewModel @Inject constructor(
 
     init {
         useCase.bindService()
+        getInitialSetupMusic()
+    }
+
+    private fun getInitialSetupMusic(){
         viewModelScope.launch {
             val savedMedias = useCase.getAllMusic()
             _mediaUiState.update {
@@ -40,25 +44,71 @@ class MediaPlayViewModel @Inject constructor(
         }
     }
 
+    private fun onTapClearButton(){
+        onEvent(MediaUIEvent.PauseAllMusic)
+        _mediaUiState.update {
+            MediaPlaybackUiState(createInitialMediaToPlayerPair())
+        }
+        viewModelScope.launch {
+            useCase.deleteAllSounds()
+        }
+    }
+
+    private fun onTapPlayAllButton(){
+        useCase.playAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
+        _mediaUiState.update {
+            _mediaUiState.value.copy(
+                isAllSelectedMusicPlaying = true
+            )
+        }
+    }
+
+    private fun onTapPauseAll(){
+        useCase.pauseAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
+        _mediaUiState.update {
+            _mediaUiState.value.copy(
+                isAllSelectedMusicPlaying = false
+            )
+        }
+    }
+
+    private fun dismissWarningDialog(){
+        _mediaUiState.update {
+            _mediaUiState.value.copy(
+                showWarning = false
+            )
+        }
+    }
+
+    private fun deleteFromCurrentlySelectedMedia(mediaItem: Pair<Pair<Int,String>,Boolean>?):
+            MutableList<Pair<Int,String>>{
+        val mutableCurrentMediaList =
+            _mediaUiState.value.currentlySelectedMedias.toMutableList()
+        mutableCurrentMediaList.remove(
+            Pair(
+                mediaItem?.first?.first,
+                mediaItem?.first?.second
+            )
+        )
+        return mutableCurrentMediaList
+    }
+
+    private fun saveMediaLocally(){
+        viewModelScope.launch {
+            useCase.saveMusic(
+                _mediaUiState.value.currentlySelectedMedias
+                    .map { it.first })
+        }
+    }
+
     fun onEvent(mediaUIEvent: MediaUIEvent) {
         when (mediaUIEvent) {
             MediaUIEvent.ClearAllMusic -> {
-                onEvent(MediaUIEvent.PauseAllMusic)
-                _mediaUiState.update {
-                    MediaPlaybackUiState(createInitialMediaToPlayerPair())
-                }
-                viewModelScope.launch {
-                    useCase.deleteAllSounds()
-                }
+                onTapClearButton()
             }
 
             MediaUIEvent.PauseAllMusic -> {
-                useCase.pauseAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
-                _mediaUiState.update {
-                    _mediaUiState.value.copy(
-                        isAllSelectedMusicPlaying = false
-                    )
-                }
+                onTapPauseAll()
             }
 
             is MediaUIEvent.PauseMusic -> {
@@ -70,21 +120,14 @@ class MediaPlayViewModel @Inject constructor(
                 val updatedMedia = mediaItem?.copy(
                     second = false
                 )
-                val mutableList = _mediaUiState.value.mediaButtonStateList.toMutableList()
-                val mutableCurrentMediaList =
-                    _mediaUiState.value.currentlySelectedMedias.toMutableList()
-                mutableCurrentMediaList.remove(
-                    Pair(
-                        mediaItem?.first?.first,
-                        mediaItem?.first?.second
-                    )
-                )
+                val mutableButtonStateList = _mediaUiState.value.mediaButtonStateList.toMutableList()
+                val updatedCurrentlySelectedList = deleteFromCurrentlySelectedMedia(mediaItem)
                 updatedMedia?.let {
-                    mutableList[index] = updatedMedia
+                    mutableButtonStateList[index] = updatedMedia
                     _mediaUiState.update {
                         _mediaUiState.value.copy(
-                            mediaButtonStateList = mutableList.toList(),
-                            currentlySelectedMedias = mutableCurrentMediaList.toList()
+                            mediaButtonStateList = mutableButtonStateList.toList(),
+                            currentlySelectedMedias = updatedCurrentlySelectedList.toList()
                         )
                     }
                 }
@@ -92,12 +135,7 @@ class MediaPlayViewModel @Inject constructor(
             }
 
             MediaUIEvent.PlayAllMusic -> {
-                useCase.playAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
-                _mediaUiState.update {
-                    _mediaUiState.value.copy(
-                        isAllSelectedMusicPlaying = true
-                    )
-                }
+                onTapPlayAllButton()
             }
 
             is MediaUIEvent.PlayMusic -> {
@@ -128,28 +166,24 @@ class MediaPlayViewModel @Inject constructor(
                         }
                         onEvent(MediaUIEvent.PlayAllMusic)
                     }
-                    viewModelScope.launch {
-                        useCase.saveMusic(
-                            _mediaUiState.value.currentlySelectedMedias
-                                .map { it.first })
-                    }
+                    saveMediaLocally()
                 } else {
-                    _mediaUiState.update {
-                        _mediaUiState.value.copy(
-                            showWarning = true
-                        )
-                    }
+                    showWarningDialog()
                 }
 
             }
 
             MediaUIEvent.DismissWarningDialog -> {
-                _mediaUiState.update {
-                    _mediaUiState.value.copy(
-                        showWarning = false
-                    )
-                }
+                dismissWarningDialog()
             }
+        }
+    }
+
+    private fun showWarningDialog() {
+        _mediaUiState.update {
+            _mediaUiState.value.copy(
+                showWarning = true
+            )
         }
     }
 
