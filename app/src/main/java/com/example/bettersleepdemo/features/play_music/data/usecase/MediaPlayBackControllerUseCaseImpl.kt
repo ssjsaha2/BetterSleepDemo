@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.example.bettersleepdemo.features.play_music.data.servie.MediaPlayBackService
+import com.example.bettersleepdemo.features.play_music.data.service.MediaPlayBackService
 import com.example.bettersleepdemo.features.play_music.domain.repository.SoundRepository
 import com.example.bettersleepdemo.features.play_music.domain.usecase.MediaPlayBackControllerUseCase
 import javax.inject.Inject
@@ -60,9 +60,6 @@ class MediaPlayBackControllerUseCaseImpl @Inject constructor(
         mediaService?.pauseAllMedia(mediaList)
     }
 
-    override fun clearAllMusic() {
-        mediaService?.clearAllMedia()
-    }
 
     override suspend fun saveMusic(listOfMedia: List<Int>) {
         repo.saveSound(listOfMedia)

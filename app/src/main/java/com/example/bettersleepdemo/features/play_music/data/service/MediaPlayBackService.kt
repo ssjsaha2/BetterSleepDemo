@@ -1,11 +1,10 @@
-package com.example.bettersleepdemo.features.play_music.data.servie
+package com.example.bettersleepdemo.features.play_music.data.service
 
 import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
-import android.provider.MediaStore.Audio.Media
 import androidx.annotation.IdRes
 
 class MediaPlayBackService: Service() {
@@ -50,10 +49,6 @@ class MediaPlayBackService: Service() {
         for(id in mediaList){
             audioToMediaPlayerMap[id]?.pause()
         }
-    }
-
-    fun clearAllMedia(){
-        //todoo
     }
 
     private fun createPlayerIfNull(id: Int){

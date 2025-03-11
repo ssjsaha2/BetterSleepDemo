@@ -12,6 +12,10 @@ hilt = "2.51.1"
 hiltNav = "1.0.0"
 dataStore = "1.0.0"
 gson = "2.10.1"
+turbine = "1.2.0"
+truth = "1.4.2"
+coroutinesTest = "1.7.3"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +37,11 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 hilt-nav-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNav"}
 datastore = {group = "androidx.datastore", name = "datastore-preferences",version.ref = "dataStore"}
 gson = {group = "com.google.code.gson", name = "gson", version.ref = "gson"}
+turbine = {group = "app.cash.turbine", name = "turbine", version.ref = "turbine"}
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+
+
 
 
 [plugins]

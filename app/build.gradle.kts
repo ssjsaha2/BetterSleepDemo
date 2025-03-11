@@ -65,4 +65,7 @@ dependencies {
     kapt(libs.hilt.android.compiler)
 
     implementation(libs.gson)
+    testImplementation(libs.turbine)
+    testImplementation(libs.truth)
+    testImplementation(libs.coroutines.test)
 }

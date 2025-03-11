@@ -5,7 +5,6 @@ interface MediaPlayBackControllerUseCase {
     fun pauseMusic(id: Int)
     fun playAllMusic(mediaList: List<Int>)
     fun pauseAllMusic(mediaList: List<Int>)
-    fun clearAllMusic()
     suspend fun saveMusic(listOfMedia: List<Int>)
     suspend fun getAllMusic(): List<Int>
     suspend fun deleteAllSounds()

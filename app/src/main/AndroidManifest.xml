@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".features.play_music.data.servie.MediaPlayBackService"
+            android:name=".features.play_music.data.service.MediaPlayBackService"
             android:enabled="true"
             android:exported="false" />
     </application>

@@ -1,5 +1,6 @@
 package com.example.bettersleepdemo.features.play_music.presentation
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bettersleepdemo.features.play_music.domain.usecase.MediaPlayBackControllerUseCase
@@ -20,7 +21,6 @@ class MediaPlayViewModel @Inject constructor(
     private val mediaFileIdMap: HashMap<Int, String>
 ) :
     ViewModel() {
-
     private var _mediaUiState: MutableStateFlow<MediaPlaybackUiState> =
         MutableStateFlow(MediaPlaybackUiState(mediaButtonStateList = createInitialMediaToPlayerPair()))
 
@@ -31,20 +31,25 @@ class MediaPlayViewModel @Inject constructor(
         getInitialSetupMusic()
     }
 
-    private fun getInitialSetupMusic(){
+    private fun getInitialSetupMusic() {
         viewModelScope.launch {
             val savedMedias = useCase.getAllMusic()
             _mediaUiState.update {
                 _mediaUiState.value.copy(
                     isAllSelectedMusicPlaying = false,
-                    currentlySelectedMedias = savedMedias.map { Pair(it,mediaFileIdMap[it]?:"") },
+                    currentlySelectedMedias = savedMedias.map {
+                        Pair(
+                            it,
+                            mediaFileIdMap[it] ?: ""
+                        )
+                    },
                     mediaButtonStateList = getInitialButtonStates(savedMedias)
                 )
             }
         }
     }
 
-    private fun onTapClearButton(){
+    private fun onTapClearButton() {
         onEvent(MediaUIEvent.PauseAllMusic)
         _mediaUiState.update {
             MediaPlaybackUiState(createInitialMediaToPlayerPair())
@@ -54,7 +59,7 @@ class MediaPlayViewModel @Inject constructor(
         }
     }
 
-    private fun onTapPlayAllButton(){
+    private fun onTapPlayAllButton() {
         useCase.playAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
         _mediaUiState.update {
             _mediaUiState.value.copy(
@@ -63,7 +68,7 @@ class MediaPlayViewModel @Inject constructor(
         }
     }
 
-    private fun onTapPauseAll(){
+    private fun onTapPauseAll() {
         useCase.pauseAllMusic(_mediaUiState.value.currentlySelectedMedias.map { it.first })
         _mediaUiState.update {
             _mediaUiState.value.copy(
@@ -72,7 +77,7 @@ class MediaPlayViewModel @Inject constructor(
         }
     }
 
-    private fun dismissWarningDialog(){
+    private fun dismissWarningDialog() {
         _mediaUiState.update {
             _mediaUiState.value.copy(
                 showWarning = false
@@ -80,8 +85,8 @@ class MediaPlayViewModel @Inject constructor(
         }
     }
 
-    private fun deleteFromCurrentlySelectedMedia(mediaItem: Pair<Pair<Int,String>,Boolean>?):
-            MutableList<Pair<Int,String>>{
+    private fun deleteFromCurrentlySelectedMedia(mediaItem: Pair<Pair<Int, String>, Boolean>?):
+            MutableList<Pair<Int, String>> {
         val mutableCurrentMediaList =
             _mediaUiState.value.currentlySelectedMedias.toMutableList()
         mutableCurrentMediaList.remove(
@@ -93,7 +98,7 @@ class MediaPlayViewModel @Inject constructor(
         return mutableCurrentMediaList
     }
 
-    private fun saveMediaLocally(){
+    private fun saveMediaLocally() {
         viewModelScope.launch {
             useCase.saveMusic(
                 _mediaUiState.value.currentlySelectedMedias
@@ -120,7 +125,8 @@ class MediaPlayViewModel @Inject constructor(
                 val updatedMedia = mediaItem?.copy(
                     second = false
                 )
-                val mutableButtonStateList = _mediaUiState.value.mediaButtonStateList.toMutableList()
+                val mutableButtonStateList =
+                    _mediaUiState.value.mediaButtonStateList.toMutableList()
                 val updatedCurrentlySelectedList = deleteFromCurrentlySelectedMedia(mediaItem)
                 updatedMedia?.let {
                     mutableButtonStateList[index] = updatedMedia
@@ -139,7 +145,7 @@ class MediaPlayViewModel @Inject constructor(
             }
 
             is MediaUIEvent.PlayMusic -> {
-                val isPermissable = checkIfLimitExceeded(3)
+                val isPermissable = checkIfInLimit()
                 if (isPermissable) {
                     useCase.playMusic(mediaUIEvent.id)
                     val mediaItem = _mediaUiState.value.mediaButtonStateList.find {
@@ -195,7 +201,7 @@ class MediaPlayViewModel @Inject constructor(
         return res.toList()
     }
 
-    private fun getInitialButtonStates(mediaList:List<Int>): List<Pair<Pair<Int,String>, Boolean>>{
+    private fun getInitialButtonStates(mediaList: List<Int>): List<Pair<Pair<Int, String>, Boolean>> {
         val res: ArrayList<Pair<Pair<Int, String>, Boolean>> = ArrayList()
         for ((id, name) in mediaFileIdMap) {
             val isSelected = id in mediaList
@@ -204,7 +210,8 @@ class MediaPlayViewModel @Inject constructor(
         return res.toList()
     }
 
-    private fun checkIfLimitExceeded(limit: Int) =
+    @VisibleForTesting
+    fun checkIfInLimit(limit: Int = 3) =
         _mediaUiState.value.currentlySelectedMedias.size < limit
 
     override fun onCleared() {
